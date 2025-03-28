@@ -1,3 +1,4 @@
+
 import { 
   ImageGenerationOptions, 
   GenerationResponse, 
@@ -84,7 +85,7 @@ export const generateDalle3Image = async (options: Omit<ImageGenerationOptions, 
   }
 };
 
-// Generate images with Flux
+// Generate images with Flux - modified to use more reliable approach
 export const generateFluxImages = async (options: Omit<ImageGenerationOptions, 'model'> & { imageCount: number }): Promise<GenerationResponse> => {
   try {
     const { prompt, aspectRatio, imageCount } = options;
@@ -95,19 +96,29 @@ export const generateFluxImages = async (options: Omit<ImageGenerationOptions, '
     
     // Flux API returns one image per call, so we need to make multiple calls for multiple images
     for (let i = 0; i < imageCount; i++) {
-      const apiUrl = `https://fluxpro-v3-by-nzr.onrender.com/fluxpro?prompt=${encodeURIComponent(prompt)}&ratio=${ratioNumber}`;
-      
-      console.log(`Fetching Flux image ${i + 1}/${imageCount}:`, apiUrl);
-      
       try {
-        // Fetch image as blob
-        const response = await fetch(apiUrl);
+        // Using a different approach with timeout to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        
+        const apiUrl = `https://fluxpro-v3-by-nzr.onrender.com/fluxpro?prompt=${encodeURIComponent(prompt)}&ratio=${ratioNumber}`;
+        console.log(`Fetching Flux image ${i + 1}/${imageCount}:`, apiUrl);
+        
+        const response = await fetch(apiUrl, { 
+          signal: controller.signal,
+          // Adding headers to avoid CORS issues
+          headers: {
+            'Accept': 'image/*, application/json',
+          }
+        });
+        
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
           throw new Error(`Flux API Error: ${response.status}`);
         }
         
-        // Convert the arraybuffer to a blob URL
+        // Convert the response to a blob URL
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
         
@@ -117,6 +128,11 @@ export const generateFluxImages = async (options: Omit<ImageGenerationOptions, '
           prompt,
           aspectRatio,
         });
+        
+        // Add a small delay between requests to avoid rate limiting
+        if (i < imageCount - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
       } catch (error) {
         console.error(`Error fetching Flux image ${i + 1}:`, error);
         errors.push(error);
@@ -124,7 +140,7 @@ export const generateFluxImages = async (options: Omit<ImageGenerationOptions, '
     }
     
     if (images.length === 0 && errors.length > 0) {
-      throw new Error('Failed to generate any images with Flux.');
+      throw new Error('Failed to generate any images with Flux. Please try again or try with a different prompt.');
     }
     
     return { 

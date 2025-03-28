@@ -1,9 +1,12 @@
+
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ImageDisplay from "@/components/ImageDisplay";
 import ImageLoading from "@/components/loading/ImageLoading";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+import ModelOption from "@/components/ModelOption";
 import { 
   AspectRatio,
   GeneratedImage,
@@ -46,6 +49,15 @@ const Generate = () => {
     try {
       let result;
       
+      // Display different toast messages based on the model
+      toast({
+        title: "Generating...",
+        description: model === "dalle3" 
+          ? "Creating your image with DALLE-3. This may take a moment." 
+          : `Creating ${imageCount} image${imageCount > 1 ? 's' : ''} with Flux.`,
+        variant: "default",
+      });
+      
       if (model === "dalle3") {
         result = await generateDalle3Image({
           prompt,
@@ -86,7 +98,7 @@ const Generate = () => {
       console.error("Generation error:", error);
       toast({
         title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate images. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate images. Please try again with a different prompt.",
         variant: "destructive",
       });
     } finally {
@@ -103,14 +115,33 @@ const Generate = () => {
         className="max-w-4xl mx-auto"
       >
         <div className="mb-12 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">AI Image Generator</h1>
-          <p className="text-muted-foreground">Create stunning visuals with advanced AI models</p>
+          <motion.h1 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1, duration: 0.5 }}
+            className="text-3xl md:text-4xl font-bold mb-4 text-gradient"
+          >
+            AI Image Generator
+          </motion.h1>
+          <motion.p 
+            initial={{ y: -10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="text-muted-foreground"
+          >
+            Create stunning visuals with advanced AI models
+          </motion.p>
         </div>
         
-        <div className="glass-card rounded-xl p-6 mb-10">
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="glass-card rounded-xl p-6 mb-10 shadow-lg"
+        >
           <div className="mb-6">
             <label className="block text-sm font-medium mb-2">Select Model</label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <ModelOption 
                 id="dalle3"
                 name="DALLE-3"
@@ -131,7 +162,11 @@ const Generate = () => {
             </div>
           </div>
           
-          <div className="mb-6">
+          <motion.div 
+            className="mb-6"
+            initial={{ height: "auto" }}
+            animate={{ height: "auto" }}
+          >
             <label className="block text-sm font-medium mb-2">Aspect Ratio</label>
             <RadioGroup 
               value={aspectRatio} 
@@ -150,24 +185,40 @@ const Generate = () => {
                 </div>
               ))}
             </RadioGroup>
-          </div>
+          </motion.div>
           
-          {model === "flux" && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">Number of Images (1-5)</label>
-              <div className="flex items-center space-x-3">
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  value={imageCount}
-                  onChange={(e) => setImageCount(parseInt(e.target.value))}
-                  className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer"
-                />
-                <span className="bg-secondary/70 px-3 py-1 rounded-md text-sm font-medium w-10 text-center">{imageCount}</span>
-              </div>
-            </div>
-          )}
+          <AnimatePresence mode="wait">
+            {model === "flux" && (
+              <motion.div 
+                key="image-count"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mb-6 overflow-hidden"
+              >
+                <label className="block text-sm font-medium mb-2">Number of Images (1-5)</label>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="range"
+                    min="1"
+                    max="5"
+                    value={imageCount}
+                    onChange={(e) => setImageCount(parseInt(e.target.value))}
+                    className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-accent"
+                  />
+                  <motion.span 
+                    key={imageCount}
+                    initial={{ scale: 1.2 }}
+                    animate={{ scale: 1 }}
+                    className="bg-secondary/70 px-3 py-1 rounded-md text-sm font-medium w-10 text-center"
+                  >
+                    {imageCount}
+                  </motion.span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           <div className="mb-6">
             <label htmlFor="prompt" className="block text-sm font-medium mb-2">Prompt</label>
@@ -189,12 +240,7 @@ const Generate = () => {
           >
             {loading ? (
               <>
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                >
-                  <Repeat size={20} />
-                </motion.div>
+                <LoadingSpinner size="sm" />
                 <span>Generating...</span>
               </>
             ) : (
@@ -204,7 +250,7 @@ const Generate = () => {
               </>
             )}
           </button>
-        </div>
+        </motion.div>
         
         <AnimatePresence>
           {loading ? (
@@ -212,7 +258,7 @@ const Generate = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {Array.from({ length: model === "flux" ? imageCount : 1 }).map((_, index) => (
                 <ImageLoading key={`loading-${index}`} aspectRatio={aspectRatio} />
@@ -222,7 +268,7 @@ const Generate = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {generatedImages.map((image, index) => (
                 <ImageDisplay key={`image-${index}`} image={image} />
@@ -231,53 +277,6 @@ const Generate = () => {
           ) : null}
         </AnimatePresence>
       </motion.div>
-    </div>
-  );
-};
-
-interface ModelOptionProps {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  selected: boolean;
-  onClick: () => void;
-}
-
-const ModelOption: React.FC<ModelOptionProps> = ({
-  id,
-  name,
-  description,
-  icon,
-  selected,
-  onClick,
-}) => {
-  return (
-    <div
-      onClick={onClick}
-      className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 ${
-        selected
-          ? "border-accent bg-accent/10 text-accent-foreground"
-          : "border-secondary bg-secondary/30 hover:bg-secondary/50"
-      }`}
-    >
-      <div className="flex items-start gap-3">
-        <div className="shrink-0 mt-0.5">{icon}</div>
-        <div>
-          <div className="font-medium">{name}</div>
-          <div className="text-sm text-muted-foreground mt-1">{description}</div>
-        </div>
-      </div>
-      {selected && (
-        <motion.div
-          layoutId="selectedModel"
-          className="absolute inset-0 border-2 border-accent rounded-lg"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          style={{ pointerEvents: "none" }}
-        />
-      )}
     </div>
   );
 };
