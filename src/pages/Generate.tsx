@@ -1,8 +1,7 @@
-
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-import { RadioGroup, RadioItem } from "@/components/ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ImageDisplay from "@/components/ImageDisplay";
 import ImageLoading from "@/components/loading/ImageLoading";
 import { 
@@ -23,10 +22,8 @@ const Generate = () => {
   const [loading, setLoading] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   
-  // Get available aspect ratios for the selected model
   const availableAspectRatios = supportedAspectRatios[model];
   
-  // Make sure the current aspect ratio is valid for the selected model
   React.useEffect(() => {
     if (!availableAspectRatios.includes(aspectRatio)) {
       setAspectRatio(availableAspectRatios[0]);
@@ -125,7 +122,7 @@ const Generate = () => {
             >
               {availableAspectRatios.map((ratio) => (
                 <div key={ratio}>
-                  <RadioItem value={ratio} id={`ratio-${ratio}`} className="peer sr-only" />
+                  <RadioGroupItem value={ratio} id={`ratio-${ratio}`} className="peer sr-only" />
                   <label
                     htmlFor={`ratio-${ratio}`}
                     className="flex h-10 items-center justify-center rounded-md border-2 border-muted bg-secondary/50 px-4 py-2 text-sm font-medium hover:bg-secondary/80 hover:text-accent-foreground peer-data-[state=checked]:border-accent peer-data-[state=checked]:bg-accent/10 peer-data-[state=checked]:text-accent cursor-pointer transition-colors"
