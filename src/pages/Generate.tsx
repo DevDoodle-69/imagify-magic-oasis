@@ -59,11 +59,29 @@ const Generate = () => {
         });
       }
       
-      if (result.error) {
+      if (result.error && result.images.length === 0) {
         throw new Error(result.error);
       }
       
-      setGeneratedImages(result.images);
+      if (result.images.length > 0) {
+        setGeneratedImages(result.images);
+        
+        if (result.error) {
+          toast({
+            title: "Partial Success",
+            description: result.error,
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "Success",
+            description: `Generated ${result.images.length} image${result.images.length > 1 ? 's' : ''}.`,
+            variant: "default",
+          });
+        }
+      } else {
+        throw new Error("No images were generated.");
+      }
     } catch (error) {
       console.error("Generation error:", error);
       toast({

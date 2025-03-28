@@ -1,4 +1,3 @@
-
 import { 
   ImageGenerationOptions, 
   GenerationResponse, 
@@ -8,6 +7,24 @@ import {
 
 // DALLE-3 API key
 const DALLE3_API_KEY = "r-bfde0b6fd826b597bdb9b511";
+
+// Convert aspect ratio to DALLE-3 type parameter
+const aspectRatioToDalleType = (aspectRatio: AspectRatio): string => {
+  const typeMap: Record<AspectRatio, string> = {
+    "1:1": "square",
+    "16:9": "wide",
+    "9:16": "tall",
+    // Other ratios default to square for DALLE-3
+    "4:3": "square",
+    "3:2": "square",
+    "5:4": "square",
+    "2:3": "tall",
+    "3:4": "tall",
+    "4:5": "tall"
+  };
+  
+  return typeMap[aspectRatio] || "square";
+};
 
 // Convert aspect ratio to Flux API ratio number
 const aspectRatioToFluxNumber = (aspectRatio: AspectRatio): number => {
@@ -30,8 +47,9 @@ const aspectRatioToFluxNumber = (aspectRatio: AspectRatio): number => {
 export const generateDalle3Image = async (options: Omit<ImageGenerationOptions, 'model'>): Promise<GenerationResponse> => {
   try {
     const { prompt, aspectRatio } = options;
+    const dalleType = aspectRatioToDalleType(aspectRatio);
     
-    const apiUrl = `https://for-devs.ddns.net/api/dalle3?prompt=${encodeURIComponent(prompt)}&type=image&apikey=${DALLE3_API_KEY}`;
+    const apiUrl = `https://for-devs.ddns.net/api/dalle3?prompt=${encodeURIComponent(prompt)}&type=${dalleType}&apikey=${DALLE3_API_KEY}`;
     
     // Show in console we're fetching (for debugging)
     console.log('Fetching from DALLE-3 API:', apiUrl);
@@ -73,6 +91,7 @@ export const generateFluxImages = async (options: Omit<ImageGenerationOptions, '
     const ratioNumber = aspectRatioToFluxNumber(aspectRatio);
     
     const images = [];
+    const errors = [];
     
     // Flux API returns one image per call, so we need to make multiple calls for multiple images
     for (let i = 0; i < imageCount; i++) {
@@ -80,26 +99,38 @@ export const generateFluxImages = async (options: Omit<ImageGenerationOptions, '
       
       console.log(`Fetching Flux image ${i + 1}/${imageCount}:`, apiUrl);
       
-      // Fetch image as blob
-      const response = await fetch(apiUrl);
-      
-      if (!response.ok) {
-        throw new Error(`Flux API Error: ${response.status}`);
+      try {
+        // Fetch image as blob
+        const response = await fetch(apiUrl);
+        
+        if (!response.ok) {
+          throw new Error(`Flux API Error: ${response.status}`);
+        }
+        
+        // Convert the arraybuffer to a blob URL
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        
+        images.push({
+          url,
+          model: 'flux' as const,
+          prompt,
+          aspectRatio,
+        });
+      } catch (error) {
+        console.error(`Error fetching Flux image ${i + 1}:`, error);
+        errors.push(error);
       }
-      
-      // Convert the arraybuffer to a blob URL
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      
-      images.push({
-        url,
-        model: 'flux' as const,
-        prompt,
-        aspectRatio,
-      });
     }
     
-    return { images };
+    if (images.length === 0 && errors.length > 0) {
+      throw new Error('Failed to generate any images with Flux.');
+    }
+    
+    return { 
+      images,
+      error: errors.length > 0 ? `${errors.length} of ${imageCount} images failed to generate.` : undefined
+    };
   } catch (error) {
     console.error('Flux generation error:', error);
     return {
