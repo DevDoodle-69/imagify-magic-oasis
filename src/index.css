@@ -57,18 +57,21 @@
     background-image: radial-gradient(circle at 50% 50%, hsl(260 25% 9%), hsl(265 35% 7%));
   }
 
+  /* Enhanced glass morphism effects */
   .glass {
-    @apply bg-opacity-20 backdrop-blur-lg bg-black border border-white/10 shadow-xl;
+    @apply bg-opacity-15 backdrop-blur-xl bg-black border border-white/10 shadow-xl;
   }
 
   .glass-card {
-    @apply bg-card/40 backdrop-blur-lg border border-white/10 shadow-xl;
+    @apply bg-card/30 backdrop-blur-lg border border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300;
   }
 
+  /* Premium text gradient with enhanced colors */
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-accent to-purple-600;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-accent to-purple-500;
   }
 
+  /* Enhanced glow effect */
   .purple-glow {
     @apply relative;
   }
@@ -79,7 +82,7 @@
   }
 
   .purple-glow:hover::after {
-    @apply opacity-100;
+    @apply opacity-100 blur-sm;
   }
   
   .shimmer {
@@ -93,44 +96,95 @@
 }
 
 @layer components {
+  /* Enhanced hero glow effect */
   .hero-glow {
     @apply relative;
   }
   
   .hero-glow::before {
     content: '';
-    @apply absolute w-[300px] h-[300px] bg-purple-700/30 rounded-full blur-[120px] -z-10;
-    animation: pulse 8s ease-in-out infinite alternate;
+    @apply absolute w-[400px] h-[400px] bg-purple-700/30 rounded-full blur-[150px] -z-10 left-0 top-0;
+    animation: pulse 10s ease-in-out infinite alternate;
   }
   
   .hero-glow::after {
     content: '';
-    @apply absolute w-[250px] h-[250px] bg-accent/20 rounded-full blur-[100px] -z-10 right-0;
-    animation: pulse 10s ease-in-out 1s infinite alternate;
+    @apply absolute w-[350px] h-[350px] bg-accent/20 rounded-full blur-[130px] -z-10 right-0 bottom-0;
+    animation: pulse 12s ease-in-out 2s infinite alternate;
   }
   
-  @keyframes pulse {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 0.5;
-    }
-    50% {
-      transform: scale(1.1);
-      opacity: 0.8;
-    }
+  /* Enhanced spotlight effect */
+  .spotlight {
+    @apply absolute pointer-events-none inset-0 z-0 bg-black/40;
+    mask-image: radial-gradient(
+      circle at calc(var(--x, 0) * 1px) calc(var(--y, 0) * 1px),
+      transparent 80px,
+      black 300px
+    );
+  }
+  
+  /* Card with border glow */
+  .premium-card {
+    @apply relative rounded-xl overflow-hidden bg-secondary/20 backdrop-blur-lg;
+  }
+  
+  .premium-card::before {
+    content: '';
+    @apply absolute inset-0 rounded-xl p-[1px] bg-gradient-to-r from-accent/50 via-purple-400/50 to-accent/50;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+  }
+  
+  /* Enhanced button styles */
+  .premium-button {
+    @apply relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-medium transition-all bg-primary rounded-md hover:bg-primary focus:outline-none;
+  }
+  
+  .premium-button::before {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-full bg-gradient-to-br from-accent to-purple-600 opacity-0 transition-opacity duration-300;
+  }
+  
+  .premium-button:hover::before {
+    @apply opacity-100;
+  }
+  
+  .premium-button span {
+    @apply relative z-10;
   }
 }
 
-/* Animations for page transitions */
+/* Enhanced keyframe animations */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1) translate(0px, 0px);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2) translate(30px, 20px);
+    opacity: 0.8;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+/* Enhanced animations for page transitions */
 .page-transition-enter {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(20px);
 }
 
 .page-transition-enter-active {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 500ms, transform 500ms;
+  transition: opacity 600ms, transform 600ms cubic-bezier(0.17, 0.67, 0.83, 0.67);
 }
 
 .page-transition-exit {
@@ -140,6 +194,30 @@
 
 .page-transition-exit-active {
   opacity: 0;
-  transform: translateY(-10px);
-  transition: opacity 500ms, transform 500ms;
+  transform: translateY(-20px);
+  transition: opacity 600ms, transform 600ms cubic-bezier(0.17, 0.67, 0.83, 0.67);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .hero-glow::before,
+  .hero-glow::after {
+    width: 250px;
+    height: 250px;
+  }
+  
+  .text-gradient {
+    background-size: 200% 100%;
+  }
+}
+
+/* Add animation for float effect */
+@layer utilities {
+  .animate-float {
+    animation: float 8s ease-in-out infinite;
+  }
+  
+  .animate-float-delayed {
+    animation: float 8s ease-in-out 2s infinite;
+  }
 }

@@ -3,6 +3,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Sparkles } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -21,9 +22,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="text-2xl font-bold text-gradient"
+              className="flex items-center gap-2"
             >
-              Imagify
+              <Sparkles className="text-accent" size={24} />
+              <span className="text-2xl font-bold text-gradient">Imagify</span>
             </motion.div>
           </Link>
           <div className="flex items-center space-x-6">
@@ -31,7 +33,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               Home
             </NavLink>
             <NavLink to="/generate" currentPath={location.pathname}>
-              Generate
+              Create
             </NavLink>
           </div>
         </nav>
@@ -46,8 +48,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       >
         {children}
       </motion.main>
-      <footer className="container mx-auto py-6 mt-12 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} Imagify. All rights reserved.</p>
+      <footer className="container mx-auto py-6 mt-12 border-t border-border/20">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="text-accent" size={16} />
+            <span className="font-medium">Imagify</span>
+          </div>
+          
+          <p className="text-xs text-muted-foreground">
+            Made With <span className="text-red-500">♥️</span> By <span className="font-medium">NZ R</span>
+          </p>
+        </div>
       </footer>
     </div>
   );
