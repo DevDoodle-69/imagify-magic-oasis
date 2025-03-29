@@ -1,6 +1,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { Card } from "@/components/ui/card";
 
 interface ModelOptionProps {
   id: string;
@@ -21,17 +22,19 @@ const ModelOption: React.FC<ModelOptionProps> = ({
 }) => {
   return (
     <motion.div
-      whileHover={{ scale: 1.02 }}
+      whileHover={{ scale: 1.02, y: -2 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+      className={`relative rounded-lg p-4 cursor-pointer transition-all duration-200 ${
         selected
-          ? "border-accent bg-accent/10 text-accent-foreground"
-          : "border-secondary bg-secondary/30 hover:bg-secondary/50"
+          ? "border-2 border-accent bg-accent/10 text-accent-foreground shadow-md"
+          : "border border-secondary bg-secondary/30 hover:bg-secondary/50"
       }`}
     >
       <div className="flex items-start gap-3">
-        <div className="shrink-0 mt-0.5">{icon}</div>
+        <div className={`shrink-0 mt-0.5 ${selected ? "text-accent" : "text-muted-foreground"}`}>
+          {icon}
+        </div>
         <div>
           <div className="font-medium">{name}</div>
           <div className="text-sm text-muted-foreground mt-1">{description}</div>

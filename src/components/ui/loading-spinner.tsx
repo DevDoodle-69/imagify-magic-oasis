@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
   className?: string;
+  color?: string;
 }
 
 const sizeMap = {
@@ -16,13 +17,15 @@ const sizeMap = {
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
   size = "md", 
-  className 
+  className,
+  color = "border-accent"
 }) => {
   return (
     <div className={cn("flex items-center justify-center", className)}>
       <motion.div
         className={cn(
-          "border-t-2 border-accent rounded-full",
+          "border-t-2 rounded-full",
+          color,
           sizeMap[size]
         )}
         animate={{ rotate: 360 }}

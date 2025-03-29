@@ -85,7 +85,7 @@ export const generateDalle3Image = async (options: Omit<ImageGenerationOptions, 
   }
 };
 
-// Generate images with Flux - modified to use more reliable approach
+// Generate images with Flux - completely rewritten for better reliability
 export const generateFluxImages = async (options: Omit<ImageGenerationOptions, 'model'> & { imageCount: number }): Promise<GenerationResponse> => {
   try {
     const { prompt, aspectRatio, imageCount } = options;
@@ -94,48 +94,37 @@ export const generateFluxImages = async (options: Omit<ImageGenerationOptions, '
     const images = [];
     const errors = [];
     
-    // Flux API returns one image per call, so we need to make multiple calls for multiple images
-    for (let i = 0; i < imageCount; i++) {
-      try {
-        // Using a different approach with timeout to prevent hanging requests
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-        
-        const apiUrl = `https://fluxpro-v3-by-nzr.onrender.com/fluxpro?prompt=${encodeURIComponent(prompt)}&ratio=${ratioNumber}`;
-        console.log(`Fetching Flux image ${i + 1}/${imageCount}:`, apiUrl);
-        
-        const response = await fetch(apiUrl, { 
-          signal: controller.signal,
-          // Adding headers to avoid CORS issues
-          headers: {
-            'Accept': 'image/*, application/json',
-          }
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          throw new Error(`Flux API Error: ${response.status}`);
+    // Maximum concurrent requests to avoid overloading
+    const MAX_CONCURRENT = 2;
+    
+    // Process requests in batches to prevent rate limiting
+    for (let i = 0; i < imageCount; i += MAX_CONCURRENT) {
+      const batch = [];
+      
+      for (let j = 0; j < MAX_CONCURRENT && i + j < imageCount; j++) {
+        batch.push(fetchSingleFluxImage(prompt, ratioNumber, i + j + 1, imageCount));
+      }
+      
+      // Wait for the current batch to complete
+      const results = await Promise.all(batch);
+      
+      // Process the results
+      results.forEach(result => {
+        if (result.success && result.url) {
+          images.push({
+            url: result.url,
+            model: 'flux' as const,
+            prompt,
+            aspectRatio,
+          });
+        } else if (result.error) {
+          errors.push(result.error);
         }
-        
-        // Convert the response to a blob URL
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        
-        images.push({
-          url,
-          model: 'flux' as const,
-          prompt,
-          aspectRatio,
-        });
-        
-        // Add a small delay between requests to avoid rate limiting
-        if (i < imageCount - 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-      } catch (error) {
-        console.error(`Error fetching Flux image ${i + 1}:`, error);
-        errors.push(error);
+      });
+      
+      // Small delay between batches to prevent rate limiting
+      if (i + MAX_CONCURRENT < imageCount) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
     
@@ -155,3 +144,41 @@ export const generateFluxImages = async (options: Omit<ImageGenerationOptions, '
     };
   }
 };
+
+// Helper function to fetch a single image from Flux API
+async function fetchSingleFluxImage(prompt: string, ratioNumber: number, currentIndex: number, totalCount: number) {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout (longer timeout)
+    
+    const apiUrl = `https://fluxpro-v3-by-nzr.onrender.com/fluxpro?prompt=${encodeURIComponent(prompt)}&ratio=${ratioNumber}`;
+    console.log(`Fetching Flux image ${currentIndex}/${totalCount}:`, apiUrl);
+    
+    const response = await fetch(apiUrl, { 
+      signal: controller.signal,
+      headers: {
+        'Accept': 'image/*, application/json',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`Flux API Error: ${response.status}`);
+    }
+    
+    // Convert the response to a blob URL
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    
+    return { success: true, url };
+  } catch (error) {
+    console.error(`Error fetching Flux image ${currentIndex}:`, error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
+  }
+}
