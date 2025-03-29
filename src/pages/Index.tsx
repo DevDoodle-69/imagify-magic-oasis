@@ -1,17 +1,36 @@
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { motion, useScroll, useTransform, useInView, useMotionValueEvent } from "framer-motion";
 import { ArrowRight, Sparkles, Image, Zap, MessageSquareCode, Bot } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
   const ref = useRef(null);
+  const spotlightRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: false, amount: 0.2 });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const y = useTransform(scrollYProgress, [0, 0.5], [0, -100]);
+  
+  // Handle spotlight effect following mouse
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (spotlightRef.current) {
+        const { clientX, clientY } = e;
+        spotlightRef.current.style.setProperty('--x', `${clientX}px`);
+        spotlightRef.current.style.setProperty('--y', `${clientY}px`);
+        setMousePosition({ x: clientX, y: clientY });
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
   
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -75,7 +94,13 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex flex-col justify-center">
+    <div className="min-h-[calc(100vh-200px)] flex flex-col justify-center relative overflow-hidden">
+      {/* Enhanced Spotlight Effect */}
+      <div 
+        ref={spotlightRef} 
+        className="spotlight absolute top-0 left-0 w-full h-full pointer-events-none z-0"
+      />
+      
       <motion.div
         style={{ opacity, y }}
         className="absolute inset-0 pointer-events-none"
@@ -88,13 +113,13 @@ const Index = () => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="flex flex-col items-center text-center max-w-4xl mx-auto z-10"
+        className="flex flex-col items-center text-center max-w-4xl mx-auto z-10 px-4"
       >
         <motion.div 
           variants={itemVariants}
           className="mb-4 inline-block"
         >
-          <div className="bg-secondary/50 text-accent rounded-full px-4 py-2 text-sm font-medium flex items-center">
+          <div className="bg-secondary/50 text-accent rounded-full px-4 py-2 text-sm font-medium flex items-center backdrop-blur-sm">
             <Sparkles size={16} className="mr-2" />
             AI-Powered Art Generation
           </div>
@@ -132,22 +157,6 @@ const Index = () => {
             Learn more
           </motion.a>
         </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 1 }}
-          className="mt-16 max-w-lg mx-auto relative z-10"
-        >
-          <img 
-            src="https://storage.googleapis.com/pai-images/ae74b3002bfe4b538493ca7aedb6a300.jpeg" 
-            alt="AI Generated Art Example" 
-            className="rounded-lg shadow-2xl"
-          />
-          <div className="absolute -bottom-3 -right-3 bg-secondary/80 backdrop-blur-sm px-4 py-2 rounded-lg text-sm text-white">
-            Generated with DALLE-3
-          </div>
-        </motion.div>
       </motion.div>
 
       <div id="features" ref={ref} className="mt-32 mb-16">
@@ -158,10 +167,10 @@ const Index = () => {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient">Why Choose Imagify</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">Experience the future of creative content generation with our cutting-edge AI technology</p>
+          <p className="text-muted-foreground max-w-2xl mx-auto px-4">Experience the future of creative content generation with our cutting-edge AI technology</p>
         </motion.div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 sm:px-6">
           {featureData.map((feature, index) => (
             <motion.div
               key={index}
@@ -187,7 +196,7 @@ const Index = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
         viewport={{ once: true, amount: 0.3 }}
-        className="mt-24 mb-16 max-w-4xl mx-auto text-center glass-card p-10 rounded-2xl"
+        className="mt-24 mb-16 max-w-4xl mx-auto text-center glass-card p-10 rounded-2xl mx-4 sm:mx-auto"
       >
         <h2 className="text-3xl font-bold mb-6">Ready to create?</h2>
         <p className="text-muted-foreground mb-8 max-w-lg mx-auto">

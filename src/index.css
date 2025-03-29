@@ -93,6 +93,16 @@
     @apply absolute top-0 left-0 w-full h-full bg-shimmer-gradient animate-shimmer;
     content: '';
   }
+  
+  /* Enhanced Spotlight Effect */
+  .spotlight {
+    background: radial-gradient(
+      800px circle at var(--x, 50%) var(--y, 0%),
+      rgba(255, 255, 255, 0.06),
+      transparent 40%
+    );
+    z-index: 0;
+  }
 }
 
 @layer components {
@@ -111,16 +121,6 @@
     content: '';
     @apply absolute w-[350px] h-[350px] bg-accent/20 rounded-full blur-[130px] -z-10 right-0 bottom-0;
     animation: pulse 12s ease-in-out 2s infinite alternate;
-  }
-  
-  /* Enhanced spotlight effect */
-  .spotlight {
-    @apply absolute pointer-events-none inset-0 z-0 bg-black/40;
-    mask-image: radial-gradient(
-      circle at calc(var(--x, 0) * 1px) calc(var(--y, 0) * 1px),
-      transparent 80px,
-      black 300px
-    );
   }
   
   /* Card with border glow */
@@ -151,6 +151,18 @@
   
   .premium-button span {
     @apply relative z-10;
+  }
+  
+  /* Magnetic button effect */
+  .magnetic-button {
+    @apply relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-medium rounded-md;
+    transform-style: preserve-3d;
+    transform: perspective(800px);
+    transition: transform 0.2s ease;
+  }
+  
+  .magnetic-button > span {
+    @apply z-10;
   }
 }
 
@@ -198,6 +210,33 @@
   transition: opacity 600ms, transform 600ms cubic-bezier(0.17, 0.67, 0.83, 0.67);
 }
 
+/* Reveal animations */
+.reveal {
+  position: relative;
+  overflow: hidden;
+}
+
+.reveal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: hsl(var(--background));
+  transform: translateX(-100%);
+  animation: reveal 0.5s ease forwards;
+}
+
+@keyframes reveal {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 /* Responsive adjustments */
 @media screen and (max-width: 768px) {
   .hero-glow::before,
@@ -209,6 +248,14 @@
   .text-gradient {
     background-size: 200% 100%;
   }
+  
+  .spotlight {
+    background: radial-gradient(
+      400px circle at var(--x, 50%) var(--y, 0%),
+      rgba(255, 255, 255, 0.06),
+      transparent 40%
+    );
+  }
 }
 
 /* Add animation for float effect */
@@ -219,5 +266,39 @@
   
   .animate-float-delayed {
     animation: float 8s ease-in-out 2s infinite;
+  }
+  
+  .animate-reveal {
+    animation: reveal 0.5s ease forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.5s ease forwards;
+  }
+  
+  .animate-slide-down {
+    animation: slideDown 0.5s ease forwards;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
