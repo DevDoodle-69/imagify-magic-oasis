@@ -22,12 +22,13 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
   const handleDownload = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     try {
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = url;
       link.download = `dalle3-masterpiece-${Date.now()}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
       toast({
         title: "Download Started",
         description: "Your masterpiece is being downloaded",
@@ -60,6 +61,7 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
               whileHover={{ scale: 1.03 }}
               transition={{ duration: 0.3 }}
             />
+
             <motion.div
               className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
               whileHover={{ scale: 1.1 }}
@@ -83,11 +85,16 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
                 </TooltipContent>
               </Tooltip>
             </motion.div>
+
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20 backdrop-blur-sm">
-              <motion.div whileHover={{ scale: 1.1 }} className="bg-accent/90 p-3 rounded-full">
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                className="bg-accent/90 p-3 rounded-full"
+              >
                 <Eye className="text-white" size={24} />
               </motion.div>
             </div>
+
             <div className="absolute bottom-3 left-3 bg-black/70 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
               {model} • {aspectRatio}
             </div>
@@ -110,8 +117,9 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.4 }}
             />
+
             <motion.div
-              className="absolute top-4 right-4 flex gap-3"
+              className="absolute top-4 right-4 flex gap-3 z-50"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.3 }}
@@ -124,6 +132,7 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
                 <Download size={20} />
                 <span className="text-sm font-medium hidden sm:inline">Download</span>
               </button>
+
               <button
                 onClick={() => setIsOpen(false)}
                 className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-full shadow-lg transition-colors duration-200"
