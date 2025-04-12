@@ -1,9 +1,8 @@
-
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Download, X, Eye } from "lucide-react";
 import { GeneratedImage } from "@/lib/models";
-import { 
+import {
   Dialog,
   DialogContent,
   DialogTrigger,
@@ -16,28 +15,25 @@ interface ImageDisplayProps {
 }
 
 const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
-  const { url, model, prompt, aspectRatio } = image;
+  const { url, model, aspectRatio } = image;
   const { toast } = useToast();
   const [isOpen, setIsOpen] = React.useState(false);
-  
+
   const handleDownload = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    
     try {
-      // Create an anchor element and set the href to the image URL
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = `dalle3-masterpiece-${Date.now()}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
       toast({
         title: "Download Started",
         description: "Your masterpiece is being downloaded",
         variant: "default",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Download Failed",
         description: "Please try again or right-click and save image",
@@ -45,7 +41,7 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
       });
     }
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <motion.div
@@ -57,16 +53,14 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
       >
         <DialogTrigger asChild>
           <div className="relative overflow-hidden cursor-pointer">
-            <motion.img 
+            <motion.img
               src={url}
               className="w-full h-auto object-cover"
               loading="lazy"
               whileHover={{ scale: 1.03 }}
               transition={{ duration: 0.3 }}
             />
-            
-            {/* Download button overlay */}
-            <motion.div 
+            <motion.div
               className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -89,44 +83,34 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
                 </TooltipContent>
               </Tooltip>
             </motion.div>
-            
-            {/* Preview icon overlay */}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20 backdrop-blur-sm">
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                className="bg-accent/90 p-3 rounded-full"
-              >
+              <motion.div whileHover={{ scale: 1.1 }} className="bg-accent/90 p-3 rounded-full">
                 <Eye className="text-white" size={24} />
               </motion.div>
             </div>
-            
-            {/* Model type badge */}
             <div className="absolute bottom-3 left-3 bg-black/70 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
               {model} • {aspectRatio}
             </div>
           </div>
         </DialogTrigger>
       </motion.div>
-      
-      {/* Full-screen dialog for image preview */}
+
       <DialogContent className="max-w-6xl p-0 bg-black/95 border-none">
         <AnimatePresence>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="relative flex items-center justify-center min-h-[85vh] p-0"
           >
-            <motion.img 
-              src={url} 
-              alt={prompt} 
-              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl" 
+            <motion.img
+              src={url}
+              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.4 }}
             />
-            
-            <motion.div 
+            <motion.div
               className="absolute top-4 right-4 flex gap-3"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -140,7 +124,6 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
                 <Download size={20} />
                 <span className="text-sm font-medium hidden sm:inline">Download</span>
               </button>
-              
               <button
                 onClick={() => setIsOpen(false)}
                 className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-full shadow-lg transition-colors duration-200"
@@ -148,15 +131,6 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
               >
                 <X size={20} />
               </button>
-            </motion.div>
-            
-            <motion.div 
-              className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.4 }}
-            >
-              <p className="text-white text-sm md:text-base max-w-3xl mx-auto font-medium">{prompt}</p>
             </motion.div>
           </motion.div>
         </AnimatePresence>
