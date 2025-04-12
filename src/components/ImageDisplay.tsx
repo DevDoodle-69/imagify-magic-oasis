@@ -4,8 +4,10 @@ import { Download, X, Eye } from "lucide-react";
 import { GeneratedImage } from "@/lib/models";
 import {
   Dialog,
-  DialogContent,
+  DialogPortal,
   DialogTrigger,
+  DialogOverlay,
+  DialogContent,
 } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +24,7 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
   const handleDownload = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     try {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = `dalle3-masterpiece-${Date.now()}.png`;
       document.body.appendChild(link);
@@ -102,48 +104,51 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
         </DialogTrigger>
       </motion.div>
 
-      <DialogContent className="max-w-6xl p-0 bg-black/95 border-none">
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="relative flex items-center justify-center min-h-[85vh] p-0"
-          >
-            <motion.img
-              src={url}
-              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.4 }}
-            />
-
+      <DialogPortal>
+        <DialogOverlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50" />
+        <DialogContent className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-transparent border-none">
+          <AnimatePresence>
             <motion.div
-              className="absolute top-4 right-4 flex gap-3 z-50"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.3 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="relative w-full max-w-6xl"
             >
-              <button
-                onClick={handleDownload}
-                className="bg-accent hover:bg-accent/80 text-white p-3 rounded-full shadow-lg transition-colors duration-200 flex items-center gap-2"
-                aria-label="Download image"
-              >
-                <Download size={20} />
-                <span className="text-sm font-medium hidden sm:inline">Download</span>
-              </button>
+              <motion.img
+                src={url}
+                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              />
 
-              <button
-                onClick={() => setIsOpen(false)}
-                className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-full shadow-lg transition-colors duration-200"
-                aria-label="Close preview"
+              <motion.div
+                className="absolute top-4 right-4 flex gap-3 z-50"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.3 }}
               >
-                <X size={20} />
-              </button>
+                <button
+                  onClick={handleDownload}
+                  className="bg-accent hover:bg-accent/80 text-white p-3 rounded-full shadow-lg transition-colors duration-200 flex items-center gap-2"
+                  aria-label="Download image"
+                >
+                  <Download size={20} />
+                  <span className="text-sm font-medium hidden sm:inline">Download</span>
+                </button>
+
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-full shadow-lg transition-colors duration-200"
+                  aria-label="Close preview"
+                >
+                  <X size={20} />
+                </button>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        </AnimatePresence>
-      </DialogContent>
+          </AnimatePresence>
+        </DialogContent>
+      </DialogPortal>
     </Dialog>
   );
 };
