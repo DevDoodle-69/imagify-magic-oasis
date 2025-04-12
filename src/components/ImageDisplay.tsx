@@ -58,8 +58,7 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ image }) => {
         <DialogTrigger asChild>
           <div className="relative overflow-hidden cursor-pointer">
             <motion.img 
-              src={url} 
-              alt={prompt}
+              src={url}
               className="w-full h-auto object-cover"
               loading="lazy"
               whileHover={{ scale: 1.03 }}
