@@ -117,7 +117,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   <span className="block">
     API Crafted by <span className="text-pink-500 font-semibold">Rishad</span> <span className="text-pink-400">♥</span>
   </span>
-</motion.p>
+</motion.p> );};
 
 interface NavLinkProps {
   to: string;
