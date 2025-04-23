@@ -105,19 +105,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <span className="font-medium">Imagify</span>
           </div>
           
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="text-xs text-muted-foreground"
-          >
-            Made With <span className="text-red-500">♥️</span> By <span className="font-medium">NZ R</span>
-          </motion.p>
-        </div>
-      </footer>
-    </div>
-  );
-};
+          <motion.p
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.5, duration: 0.6, ease: 'easeOut' }}
+  className="text-sm text-muted-foreground text-center leading-relaxed"
+>
+  <span className="block">
+    Made with <span className="text-red-500 font-bold">♥</span> by <span className="font-semibold text-white">NZ R</span>
+  </span>
+  <span className="block">
+    API Crafted by <span className="text-pink-500 font-semibold">Rishad</span> <span className="text-pink-400">♥</span>
+  </span>
+</motion.p>
 
 interface NavLinkProps {
   to: string;
